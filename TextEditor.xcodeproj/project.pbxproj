@@ -328,12 +328,12 @@
 				964A124129179BC7007437F7 /* ZSSFontsViewController.h */,
 				964A124229179BC7007437F7 /* editor.html */,
 				964A124329179BC7007437F7 /* ZSSTextView.h */,
+				964A125E29179BC7007437F7 /* ZSSTextView.m */,
 				964A124429179BC7007437F7 /* ZSSRichTextEditor.m */,
 				964A124529179BC7007437F7 /* ZSSBarButtonItem.m */,
 				964A124629179BC7007437F7 /* JSBeautifier.js */,
 				964A124729179BC7007437F7 /* ZSSFontsViewController.m */,
 				964A124829179BC7007437F7 /* Third Party */,
-				964A125E29179BC7007437F7 /* ZSSTextView.m */,
 				964A125F29179BC7007437F7 /* jQuery.js */,
 			);
 			path = Source;
@@ -808,7 +808,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.digitech.notesApp2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zoely.notepad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -845,7 +845,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.digitech.notesApp2;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zoely.notepad;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

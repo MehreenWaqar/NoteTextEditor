@@ -147,6 +147,10 @@ static Class hackishFixClass = Nil;
  */
 @property (nonatomic, strong) UIToolbar *toolbar;
 @property (nonatomic, strong) UIView *parentToolbar;
+@property (nonatomic, strong) ZSSBarButtonItem *redoButton;
+@property (nonatomic, strong) ZSSBarButtonItem *undoButton;
+@property (nonatomic) BOOL enableRedo;
+
 
 /*
  *  Holder for all of the toolbar components
@@ -298,7 +302,8 @@ static CGFloat kDefaultScale = 0.5;
 - (void)viewDidLoad {
     
     [super viewDidLoad];
-//    
+    NSLog(@"viewDidLoad");
+//
 //    Hierarchy
 //    ZSSTextView -> WKWebView
 //    UIBarButtonItem -> UIToolbar -> UIToolbar -> UIView -> self.view
@@ -311,6 +316,7 @@ static CGFloat kDefaultScale = 0.5;
     self.shouldShowKeyboard = YES;
     self.formatHTML = YES;
     self.parentScrollVisible = true;
+    self.enableRedo = false;
     
     //Initalise enabled toolbar items array
     self.enabledToolbarItems = [[NSArray alloc] init];
@@ -459,6 +465,7 @@ static CGFloat kDefaultScale = 0.5;
     self.editorView.backgroundColor = [UIColor whiteColor];
     [self.editorView hack_removeInputAccessory];
     [self removeAutoCompleteFromWebView:self.editorView];
+    
     [self.view addSubview:self.editorView];
     
 }
@@ -645,13 +652,15 @@ static CGFloat kDefaultScale = 0.5;
     spaceButton.label = @"space";
     
     
-    ZSSBarButtonItem *undoButton = [[ZSSBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"in-sight.undo"] style:UIBarButtonItemStylePlain target:self action:@selector(undo:)];
-    undoButton.label = @"undo";
-    [items addObject:undoButton];
+    self.undoButton = [[ZSSBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"in-sight.undo"] style:UIBarButtonItemStylePlain target:self action:@selector(undo:)];
+    self.undoButton.label = @"undo";
+    self.undoButton.enabled = false;
+    [items addObject:self.undoButton];
         
-    ZSSBarButtonItem *redoButton = [[ZSSBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"in-sight.redo"] style:UIBarButtonItemStylePlain target:self action:@selector(redo:)];
-    redoButton.label = @"redo";
-    [items addObject:redoButton];
+    self.redoButton = [[ZSSBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"in-sight.redo"] style:UIBarButtonItemStylePlain target:self action:@selector(redo:)];
+    self.redoButton.label = @"redo";
+    self.redoButton.enabled = false;
+    [items addObject:self.redoButton];
         
     
     ZSSBarButtonItem *checklistButton = [[ZSSBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"in-sight.checklist"] style:UIBarButtonItemStylePlain target:self action:@selector(checklist:)];
@@ -997,12 +1006,12 @@ static CGFloat kDefaultScale = 0.5;
     
     // Dash List
     if ((_enabledToolbarItems && [_enabledToolbarItems containsObject:ZSSRichTextEditorToolbarDashList]) || (_enabledToolbarItems && [_enabledToolbarItems containsObject:ZSSRichTextEditorToolbarAll])) {
-        ZSSBarButtonItem *ul = [[ZSSBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"in-sight.dash.list" inBundle:bundle compatibleWithTraitCollection:nil] style:UIBarButtonItemStylePlain target:self action:@selector(setDashList:)];
-        ul.label = @"dashList";
+        ZSSBarButtonItem *dl = [[ZSSBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"in-sight.dash.list" inBundle:bundle compatibleWithTraitCollection:nil] style:UIBarButtonItemStylePlain target:self action:@selector(setDashList)];
+        dl.label = @"dashList";
         if (customOrder) {
-            [items replaceObjectAtIndex:[_enabledToolbarItems indexOfObject:ZSSRichTextEditorToolbarDashList] withObject:ul];
+            [items replaceObjectAtIndex:[_enabledToolbarItems indexOfObject:ZSSRichTextEditorToolbarDashList] withObject:dl];
         } else {
-            [items addObject:ul];
+            [items addObject:dl];
         }
     }
     
@@ -1123,7 +1132,7 @@ static CGFloat kDefaultScale = 0.5;
 
 
 - (void)buildToolbar {
-    
+    NSLog(@"buildToolbar");
     // Check to see if we have any toolbar items, if not, add them all
     NSMutableArray *items = [[NSMutableArray alloc] init];
     items = [NSMutableArray arrayWithArray:[self itemsForToolbar]];
@@ -1203,17 +1212,21 @@ static CGFloat kDefaultScale = 0.5;
         self.toolbar.frame = CGRectMake(0, 0, ((44 * items.count - 4) + 8), 44); //toolbarWidth+100
         self.toolBarScroll.frame = CGRectMake(0, 0, self.view.frame.size.width - 44, 44);
         self.toolbarCropper.hidden = false;
+        self.toolBarScroll.contentSize = CGSizeMake(self.toolbar.frame.size.width, 44);
     }
     else {
         NSLog(@"DEF");
         self.toolbar.frame = CGRectMake(0, 0, self.view.frame.size.width, 44);
         self.toolBarScroll.frame = CGRectMake(0, 0, self.view.frame.size.width, 44);
         self.toolbarCropper.hidden = true;
+        self.toolBarScroll.contentSize = CGSizeMake(self.view.frame.size.width - 100, 44);
+        self.toolBarScroll.backgroundColor = [UIColor redColor];
 //        self.toolbarHolder.hidden = false;
         
 //toolbarWidth+100
     }
-    self.toolBarScroll.contentSize = CGSizeMake(self.toolbar.frame.size.width, 44);
+    
+//    self.toolBarScroll.autoresizingMask = self.toolbar.autoresizingMask;
     self.toolBarScroll.backgroundColor = [UIColor whiteColor];
 }
 
@@ -1396,7 +1409,19 @@ static CGFloat kDefaultScale = 0.5;
 //    self.parentToolbar.hidden = true;
 //    self.toolbar.hidden = false;
     self.toolbarCropper.hidden = true;
+    self.toolbar.frame = CGRectMake(0, 0, self.view.frame.size.width, 44);
+    self.toolBarScroll.frame = CGRectMake(0, 0, self.view.frame.size.width, 44);
+    self.toolBarScroll.contentSize = CGSizeMake(self.view.frame.size.width - 100, 44);
+
     self.parentScrollVisible = true;
+    NSLog(@"enableRedo: %d",self.enableRedo);
+    NSLog(@"sourceView: %@",self.sourceView.text);
+
+    if (self.enableRedo) {
+        self.redoButton.enabled = true;
+        self.undoButton.enabled = true;
+    }
+    
     [self buildToolbar];
 }
 
@@ -1497,7 +1522,9 @@ static CGFloat kDefaultScale = 0.5;
 - (void)setUnderline {
     NSString *trigger = @"zss_editor.setUnderline();";
     [self.editorView evaluateJavaScript:trigger completionHandler:^(NSString *result, NSError *error) {
-     
+        NSLog(@"Err: %@",[error localizedDescription]);
+        NSLog(@"Result: %@",result);
+
     }];
 }
 
@@ -1523,12 +1550,13 @@ static CGFloat kDefaultScale = 0.5;
 }
 
 - (void)setDashList {
-    [self showPopup];
+//    [self showPopup];
 
 //    NSString *trigger = @"zss_editor.setDashList();";
-//    [self.editorView evaluateJavaScript:trigger completionHandler:^(NSString *result, NSError *error) {
-//     
-//    }];
+    NSString *trigger = @"zss_editor.setUnorderedList(dash);";
+    [self.editorView evaluateJavaScript:trigger completionHandler:^(NSString *result, NSError *error) {
+     
+    }];
 }
 - (void)setOrderedList {
     NSString *trigger = @"zss_editor.setOrderedList();";
@@ -1713,6 +1741,7 @@ static CGFloat kDefaultScale = 0.5;
 }
 
 - (void)undo:(ZSSBarButtonItem *)barButtonItem {
+    self.enableRedo = true;
     [self.editorView evaluateJavaScript:@"zss_editor.undo();" completionHandler:^(NSString *result, NSError *error) {
      
     }];
@@ -2188,6 +2217,10 @@ static CGFloat kDefaultScale = 0.5;
     }
     
     if ([messageString isEqualToString:@"input"]) {
+        self.undoButton.enabled = true;
+        if (self.enableRedo) {
+            self.redoButton.enabled = true;
+        }
         
         if (_receiveEditorDidChangeEvents) {
             [self updateEditor];
@@ -2268,6 +2301,15 @@ static CGFloat kDefaultScale = 0.5;
 }
 
 - (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+    [webView evaluateJavaScript:@"document.body.innerText" completionHandler:^(NSString *result, NSError *error) {
+        if (error != NULL) {
+            NSLog(@"%@", error);
+        }
+        NSLog(@"WebView Result: %@", result);
+
+    }];
+    
+
     self.editorLoaded = YES;
     
     if (!self.internalHTML) {

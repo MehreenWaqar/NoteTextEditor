@@ -21,10 +21,22 @@
 
 - (void)commonSetup
 {
-    _defaultFont = [UIFont systemFontOfSize:14.0f];
-    _boldFont = [UIFont boldSystemFontOfSize:14.0f];
-    _italicFont = [UIFont fontWithName:@"HelveticaNeue-Oblique" size:14.0f];
+    NSLog(@"commonSetup");
+//    for (NSString *familyName in [UIFont familyNames]){
+//        NSLog(@"Family name: %@", familyName);
+//        for (NSString *fontName in [UIFont fontNamesForFamilyName:familyName]) {
+//            NSLog(@"--Font name: %@", fontName);
+//        }
+//    }
     
+    _defaultFont = [UIFont fontWithName:@"InstrumentSans-Regular" size:14.0f];
+    _boldFont = [UIFont fontWithName:@"InstrumentSans-Bold" size:14.0f];
+    _italicFont = [UIFont fontWithName:@"InstrumentSans-Italic" size:14.0f];
+    
+//    _defaultFont = [UIFont systemFontOfSize:14.0f];
+//    _boldFont = [UIFont boldSystemFontOfSize:14.0f];
+//    _italicFont = [UIFont fontWithName:@"HelveticaNeue-Oblique" size:14.0f];
+//
     self.font = _defaultFont;
     
     [self addObserver:self forKeyPath:NSStringFromSelector(@selector(defaultFont)) options:NSKeyValueObservingOptionNew context:0];

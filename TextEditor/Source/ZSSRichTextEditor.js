@@ -288,13 +288,19 @@ zss_editor.setOrderedList = function() {
     zss_editor.enabledEditingItems();
 }
 
-zss_editor.setUnorderedList = function() {
-    document.execCommand('insertUnorderedList', false, null);
+zss_editor.setUnorderedList = function(e) {
+    if (e == 'dash') {
+        document.execCommand('insertOrderedList', false, null);
+    }
+    else {
+        document.execCommand('insertUnorderedList', false, null);
+    }
     zss_editor.enabledEditingItems();
 }
 
 zss_editor.setDashList = function() {
-    document.execCommand('insertDashList', false, null);
+//    document.execCommand('insertDashList', false, null);
+    document.execCommand('insertUnorderedList', false, null);
     zss_editor.enabledEditingItems();
 }
 
@@ -537,7 +543,13 @@ zss_editor.getText = function() {
 }
 
 zss_editor.isCommandEnabled = function(commandName) {
+<<<<<<< HEAD
     return document.queryCommandState(commandName);
+=======
+    let res = document.queryCommandState(commandName);
+    console.log('isCommandEnabled - ',commandName, ' = ', res);
+    return res;
+>>>>>>> master
 }
 
 zss_editor.enabledEditingItems = function(e) {
@@ -569,7 +581,7 @@ zss_editor.enabledEditingItems = function(e) {
         items.push('unorderedList');
     }
     if (zss_editor.isCommandEnabled('insertDashList')) {
-        items.push('dashList');
+        items.push('unorderedList[square]');
     }
     if (zss_editor.isCommandEnabled('justifyCenter')) {
         items.push('justifyCenter');
@@ -658,7 +670,8 @@ zss_editor.enabledEditingItems = function(e) {
         } else {
             console.log("callback://"+items.join(','));
         }
-    } else {
+    } 
+    else {
         if (zss_editor.isUsingiOS) {
             window.location = "zss-callback/";
         } else {
